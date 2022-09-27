@@ -72,6 +72,7 @@
 					method: 'POST',
 					url: 'https://fanyi.baidu.com/v2transapi',
 					headers: {
+						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
 						'Content-Type': 'application/x-www-form-urlencoded'
 					},
 					data: toQueryString({
@@ -99,6 +100,7 @@
 						method: 'POST',
 						url: 'https://fanyi.baidu.com/langdetect',
 						headers: {
+							'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
 							'Content-Type': 'application/x-www-form-urlencoded'
 						},
 						data: toQueryString({'query': text}),
@@ -171,6 +173,9 @@
 					const url = 'https://fanyi.baidu.com';
 					GM_xmlhttpRequest({
 						method: 'GET',
+						headers: {
+							'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+						}
 						url: url,
 						onload: function(response) {
 							callback(response.responseText);
