@@ -1,0 +1,15 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+textarea {
+	width: 90vw;
+	height: 75vh;
+}
+
+button {
+	width: 90vw;
+	height: 15vh;
+}
