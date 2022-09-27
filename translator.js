@@ -1,7 +1,10 @@
 (function() {
+	console.log('Translator working mode: ' + window.GM_grant ? 'direct' : 'event');
 	window.GM_grant ? work() : window.addEventListener('gmready', work);
 
 	function work() {
+		console.log('Translator working...')
+		
 		const BDT = new BaiduTranslateAPI();
 		window.baidu_translate = baidu_translate;
 
