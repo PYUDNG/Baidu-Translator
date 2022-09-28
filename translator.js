@@ -8,10 +8,40 @@
 		const BDT = new BaiduTranslateAPI();
 		window.baidu_translate = baidu_translate;
 
-		function baidu_translate(text, callback, split=5000) {
+		function baidu_translate() {
 			// Check BDT ready
 			if (!BDT.gtk || !BDT.token) {
-				throw new Error('BaiduTranslateAPI not ready');
+				//throw new Error('BaiduTranslateAPI not ready');
+				return false;
+			}
+
+			// Get argument
+			let text='', src, dst, callback=function() {}, split=5000, onerror=function() {};
+			switch (arguments.length) {
+				case 1: {
+					const details = arguments[0];
+					details.hasOwnProperty('text') && (text = details.text);
+					details.hasOwnProperty('src') && (src = details.src);
+					details.hasOwnProperty('dst') && (dst = details.dst);
+					details.hasOwnProperty('callback') && (callback = details.callback);
+					details.hasOwnProperty('split') && (split = details.split);
+					break;
+				}
+				case 2:
+					[text, callback] = arguments;
+					break;
+				case 3:
+					[text, callback, onerror] = arguments;
+					break;
+				case 4:
+					[text, callback, onerror, split] = arguments;
+					break;
+				case 5:
+					[text, dst, callback, onerror, split] = arguments;
+					break;
+				case 6:
+					[text, src, dst, callback, onerror, split] = arguments;
+					break;
 			}
 
 			// Split lines
@@ -39,6 +69,9 @@
 				BDT.translate({
 					text: t,
 					args: [++index],
+					src: src,
+					dst: dst,
+					onerror: onerror,
 					callback: function(json, i) {
 						const temp_result = json.trans_result.data.reduce(function(pre, cur) {
 							return pre + '\n'.repeat(cur.prefixWrap+1) + cur.dst;
@@ -49,6 +82,8 @@
 				});
 			}
 			AM.finishEvent = true;
+
+			return true;
 		}
 
 		function BaiduTranslateAPI() {
@@ -66,6 +101,7 @@
 				const text = details.text;
 				const src = details.src || await langDetect(text);
 				const dst = details.dst || 'zh';
+				const onerror = details.onerror || function() {};
 				const args = details.args || [];
 
 				GM_xmlhttpRequest({
@@ -84,13 +120,20 @@
 			            'token': BT.token
 			        }),
 					onload: function(response) {
-						if (response.status !== 200) {
-							console.log(response);
+						response.status !== 200 && Err(response);
+						const json = JSON.parse(response.responseText);
+						json.error && Err(json);
+						callback.apply(null, [json].concat(args));
+
+						function Err(e) {
+							onerror(e);
+							console.log(e);
 							throw new Error('Server returned with an error (logged above)');
 						}
-						const json = JSON.parse(response.responseText);
-						callback.apply(null, [json].concat(args));
-					}
+					},
+					onerror: onerror,
+					ontimeout: onerror,
+					onabort: onerror,
 				});
 			}
 
