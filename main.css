@@ -10,6 +10,7 @@ textarea {
 	width: 99vw;
 	height: 65vh;
 	padding: 0;
+	font-size: 3vmin;
 }
 
 .button {
@@ -18,6 +19,7 @@ textarea {
 	margin: 1vh 1vw;
 	text-align: center;
 	line-height: 15vh;
+	font-size: 3vmin;
 	background: cornflowerblue;
 }
 .button:hover {
