@@ -156,7 +156,7 @@
 				function retryRequest(e) {
 					translate({
 						callback: callback,
-						text: typeof e === 'object' && e !== null && e.query ? e.query : text,
+						text: text,
 						src: src,
 						dst: dst,
 						onerror: onerror,
