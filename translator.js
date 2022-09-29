@@ -16,7 +16,7 @@
 			}
 
 			// Get argument
-			let text='', src, dst, callback=function() {}, split=5000, onerror=function() {};
+			let text='', src, dst, callback=function() {}, split=5000, onerror=function() {}, retry=3;
 			switch (arguments.length) {
 				case 1: {
 					const details = arguments[0];
@@ -42,6 +42,9 @@
 				case 6:
 					[text, src, dst, callback, onerror, split] = arguments;
 					break;
+				case 7:
+					[text, src, dst, callback, onerror, split, retry] = arguments;
+					break;
 			}
 
 			// Split lines
@@ -65,6 +68,7 @@
 				while (textarr.length > 0 && t.length + textarr[0].length < split) {
 					t += '\n' + textarr.shift();
 				}
+				t = t.substr(1);
 				AM.add();
 				BDT.translate({
 					text: t,
@@ -72,6 +76,7 @@
 					src: src,
 					dst: dst,
 					onerror: onerror,
+					retry: retry,
 					callback: function(json, i) {
 						const temp_result = json.trans_result.data.reduce(function(pre, cur) {
 							return pre + '\n'.repeat(cur.prefixWrap+1) + cur.dst;
@@ -102,6 +107,7 @@
 				const src = details.src || await langDetect(text);
 				const dst = details.dst || 'zh';
 				const onerror = details.onerror || function() {};
+				const retry = details.retry || 0;
 				const args = details.args || [];
 
 				GM_xmlhttpRequest({
@@ -126,15 +132,38 @@
 						callback.apply(null, [json].concat(args));
 
 						function Err(e) {
-							onerror(e);
+							!_onerror(e) && console.log('Retrying...\nleft: ' + (retry-1).toString());
 							console.log(e);
 							throw new Error('Server returned with an error (logged above)');
 						}
 					},
-					onerror: onerror,
-					ontimeout: onerror,
-					onabort: onerror,
+					onerror: _onerror,
+					ontimeout: _onerror,
+					onabort: _onerror,
 				});
+
+				// Returns true for error, false for retry
+				function _onerror(e) {
+					console.log('sign = ' + calcSign(text));
+					if (retry > 0) {
+						setTimeout(retryRequest.bind(null, e), 500);
+						return false;
+					}
+					onerror(e);
+					return true;
+				}
+
+				function retryRequest(e) {
+					translate({
+						callback: callback,
+						text: typeof e === 'object' && e !== null && e.query ? e.query : text,
+						src: src,
+						dst: dst,
+						onerror: onerror,
+						retry: retry - 1,
+						args: args
+					});
+				}
 			}
 
 			function langDetect(text) {
