@@ -23,3 +23,19 @@ textarea {
 .button:hover {
 	background: royalblue;
 }
+
+#copy {
+	position: fixed;
+	bottom: 34.5vh;
+	right: 0.5vw;
+	width: 10vmax;
+	height: 10vmax;
+	font-size: 8vmax;
+	padding: 0;
+	margin: 0;
+	color: cornflowerblue;
+}
+
+#copy:hover {
+	color: royalblue;
+}

@@ -16,6 +16,7 @@ const CONST = {
 window.addEventListener('load', function () {
 	alertify.set('notifier','position', 'top-right');
 
+	// Translate button
 	const input = $('#input');
 	const btnTrans = $('#btnTrans');
 	btnTrans.addEventListener('click', function() {
@@ -34,6 +35,7 @@ window.addEventListener('load', function () {
 		});
 	});
 
+	// Translate txt file button
 	const btnFile = $('#btnFile');
 	const fileInput = $CrE('input');
 	fileInput.type = 'file';
@@ -56,6 +58,12 @@ window.addEventListener('load', function () {
 		btnTrans.click();
 		enable(btnFile);
 	};
+
+	// Copy translate result button
+	const copy = $('#copy');
+	copy.addEventListener('click', function() {
+		copyText(input.value);
+	});
 });
 
 // Basic functions
@@ -115,4 +123,15 @@ function enable(btn, text) {
 		btn.innerText = btn.originText;
 	}
 	return true;
+}
+
+// Copy text to clipboard (needs to be called in an user event)
+function copyText(text) {
+    // Create a new textarea for copying
+    const newInput = $CrE('textarea');
+    document.body.appendChild(newInput);
+    newInput.value = text;
+    newInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(newInput);
 }
