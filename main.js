@@ -7,6 +7,7 @@ const CONST = {
 		FileSytaxError: '文件格式错误</br>仅接受txt文本文档',
 		Success: '翻译完毕',
 		Error: '发生了未知错误',
+		Copied: '已复制',
 	},
 	Style: {
 		DisabledColor: 'gray',
@@ -63,6 +64,7 @@ window.addEventListener('load', function () {
 	const copy = $('#copy');
 	copy.addEventListener('click', function() {
 		copyText(input.value);
+		alertify.success(CONST.Text.Copied);
 	});
 });
 
