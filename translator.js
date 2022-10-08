@@ -1,11 +1,15 @@
 (function() {
 	console.log('Translator working mode: ' + (window.GM_grant ? 'direct' : 'event'));
+	window.transready = false;
 	window.GM_grant ? work() : window.addEventListener('gmready', work);
 
 	function work() {
 		console.log('Translator working...')
 
-		const BDT = new BaiduTranslateAPI();
+		const BDT = new BaiduTranslateAPI(function() {
+			window.dispatchEvent(new Event('transready'));
+			window.transready = true;
+		});
 		window.baidu_translate = baidu_translate;
 
 		function baidu_translate() {
@@ -91,12 +95,12 @@
 			return true;
 		}
 
-		function BaiduTranslateAPI() {
+		function BaiduTranslateAPI(initCallback) {
 			const BT = this;
 			const GM_xmlhttpRequest = window.GM_grant('GM_xmlhttpRequest');
 			BT.gtk = BT.token = null;
 
-			init();
+			init(initCallback);
 
 			BT.calcSign = calcSign;
 			BT.translate = translate;
@@ -233,12 +237,13 @@
 			}
 
 			// Request token and gtk
-			function init() {
+			function init(callback) {
 				// Request twice, make sure gtk is latest,
 				// or may get 998 error while requesting translate API
 				requestIndex(requestIndex.bind(null, function(html) {
 					BT.token = html.match(/token: ["'](.*?)["'],/)[1];
 					BT.gtk = html.match(/window.gtk = ["'](.*?)["'];/)[1];
+					callback();
 				}));
 
 				function requestIndex(callback) {

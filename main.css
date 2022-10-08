@@ -26,18 +26,23 @@ textarea {
 	background: royalblue;
 }
 
-#copy {
-	position: fixed;
+.sideButton {
+	display: flex;
+	flex-direction: column-reverse;
+	text-align: center;
 	bottom: 34.5vh;
+	position: fixed;
 	right: 0.5vw;
-	width: 10vmax;
-	height: 10vmax;
-	font-size: 8vmax;
 	padding: 0;
 	margin: 0;
+}
+
+.sideButton > * {
+	padding: 1vmax;
+	font-size: 8vmax;
 	color: cornflowerblue;
 }
 
-#copy:hover {
+.sideButton > *:hover {
 	color: royalblue;
 }
