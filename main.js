@@ -26,6 +26,9 @@ window.addEventListener('load', function () {
 	// Init GUI
 	window.transready ? ready() : initing();
 
+	// Vars
+	let filename = CONST.Text.DefaultFilename;
+
 	// Translate button
 	const input = $('#input');
 	const btnTrans = $('#btnTrans');
@@ -38,6 +41,10 @@ window.addEventListener('load', function () {
 	// Copy translate result button
 	const btnCopy = $('#copy');
 	btnCopy.addEventListener('click', copyInput);
+
+	// Copy translate result button
+	const btnName = $('#name');
+	btnName.addEventListener('click', copyFilename);
 
 	// Download translate result button
 	const btnDownload = $('#download');
@@ -91,7 +98,7 @@ window.addEventListener('load', function () {
 
 		function fileChange() {
 			const file = fileInput.files[0];
-			btnDownload.filename = file.name;
+			filename = file.name;
 			if (file.type !== 'text/plain') {
 				alertify.error(CONST.Text.FileSytaxError);
 				return false;
@@ -113,8 +120,15 @@ window.addEventListener('load', function () {
 		alertify.success(CONST.Text.Copied);
 	}
 
+	function copyFilename() {
+		copyText(filename);
+		alertify.success(CONST.Text.Copied);
+	}
+
 	function dlInput() {
-		downloadText(input.value, btnDownload.filename || CONST.Text.DefaultFilename);
+		const GM_download = GM_grant('GM_download');
+		//downloadText_GM(input.value, filename); // <-- Not working in xbrowser
+		downloadText(input.value, filename);
 		alertify.success(CONST.Text.Downloaded);
 	}
 
@@ -196,6 +210,28 @@ function downloadText(text, name) {
 	a.href = url;
 	a.download = name;
 	a.click();
+
+	// Revoke url
+	//URL.revokeObjectURL(url); // <-- Not working in xbrowser
+	setTimeout(URL.revokeObjectURL.bind(URL, url), 1000);
+}
+
+// Save text to textfile using GM_download
+function downloadText_GM(text, name) {
+	if (!text || !name) {return false;};
+	if (typeof GM_download !== 'function' && typeof GM_grant !== 'function') {return false;}
+	const GM_dl = typeof GM_download === 'function' ? GM_download : GM_grant('GM_download');
+
+	// Get blob url
+	const blob = new Blob([text],{type:"text/plain;charset=utf-8"});
+	const url = URL.createObjectURL(blob);
+
+	// Download and then revoke url
+	GM_dl({
+		url: url, 
+		name: name,
+		onload: URL.revokeObjectURL.bind(URL, url)
+	});
 }
 
 // Copy text to clipboard (needs to be called in an user event)
