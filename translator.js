@@ -84,7 +84,7 @@
 					callback: function(json, i) {
 						const temp_result = json.trans_result.data.reduce(function(pre, cur) {
 							return pre + '\n'.repeat(cur.prefixWrap+1) + cur.dst;
-						}, '');
+						}, '').substring(1);
 						result[i] = temp_result;
 						AM.finish();
 					}
