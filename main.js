@@ -72,6 +72,7 @@ window.addEventListener('load', function () {
 	function translateInput() {
 		// Button status
 		if (btnTrans.disabled) {return false;}
+		disable(btnTrans, CONST.Text.TranslatStart);
 
 		// Translate
 		const box = alertify.message(CONST.Text.TranslatStart, 0)
