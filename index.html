@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>百度翻译</title>
+
+	<!-- AlertiyJs -->
+	<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
+
+	<!-- FontAwesome -->
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+
+	<!-- Main -->
+	<script type="text/javascript" src="GMWebHooks.js"></script>
+	<script type="text/javascript" src="translator.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+	<textarea id="input"></textarea>
+	<div class="button" id="btnTrans">翻译到中文</div>
+	<div class="button" id="btnFile">翻译txt文档</div>
+	<div class="sideButton">
+		<i class="fa-solid fa-clipboard" id="name" title="复制文件名"></i>
+		<i class="fa-solid fa-file-lines" id="copy" title="复制翻译结果"></i>
+		<i class="fa-solid fa-file-arrow-down" id="download" title="下载翻译结果"></i>
+		<i class="fa-solid fa-xmark" id="empty" title="清空输入框"></i>
+	</div>
+</body>
+</html>
