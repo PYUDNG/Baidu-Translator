@@ -81,6 +81,11 @@ window.addEventListener('load', function () {
 			box.dismiss();
 			alertify.success(CONST.Text.Success);
 			enable(btnTrans);
+			setTimeout(e => {
+				input.focus();
+				input.setSelectionRange(0, 0);
+				input.scrollTo(0, 0);
+			}, 0)
 		}, function(rest) {
 			box.setContent(replaceText(CONST.Text.Translating, { '{Rest}': rest.toString() }))
 		}, function(err) {
