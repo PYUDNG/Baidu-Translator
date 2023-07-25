@@ -5,7 +5,7 @@
 // @name:zh-CN         用户脚本应用核心
 // @name:en            Userscript App Core
 // @namespace          Userscript-App
-// @version            0.2
+// @version            0.3
 // @description        Userscript App Core For Userscript Web Apps
 // @description:zh-CN  用户脚本网页应用核心
 // @description:en     Userscript App Core For Userscript Web Apps
@@ -152,9 +152,10 @@
 			GM_saveTab: typeof GM_saveTab === 'function' ? GM_saveTab : null,
 			GM_getTabs: typeof GM_getTabs === 'function' ? GM_getTabs : null,
 			GM_notification: typeof GM_notification === 'function' ? GM_notification : null,
-			GM_setClipboard: typeof GM_setClipboard === 'function' ? GM_setClipboard : null
+			GM_setClipboard: typeof GM_setClipboard === 'function' ? GM_setClipboard : null,
+			GM_info: typeof GM_info === 'object' ? GM_info : null,
 		};
-		if (Object.keys(GMFuncs).includes(name)) {
+		if (GMFuncs.hasOwnProperty(name)) {
 			return GMFuncs[name];
 		} else {
 			return null;
