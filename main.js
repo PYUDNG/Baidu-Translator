@@ -81,11 +81,11 @@ window.addEventListener('load', function () {
 			box.dismiss();
 			alertify.success(CONST.Text.Success);
 			enable(btnTrans);
-			setTimeout(e => {
+			isMobile() && setTimeout(e => {
 				input.focus();
 				input.setSelectionRange(0, 0);
 				input.scrollTo(0, 0);
-			}, 0)
+			});
 		}, function(rest) {
 			box.setContent(replaceText(CONST.Text.Translating, { '{Rest}': rest.toString() }))
 		}, function(err) {
@@ -383,4 +383,18 @@ function replaceText(text, replacer) {
 		}
 		return result_arr;
 	}
+}
+
+function isMobile() {
+	var ua = navigator.userAgent.toLowerCase();
+	var StringPhoneReg = "\\b(ip(hone|od)|android|opera m(ob|in)i" +
+		"|windows (phone|ce)|blackberry" +
+		"|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp" +
+		"|laystation portable)|nokia|fennec|htc[-_]" +
+		"|mobile|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b";
+	var StringTableReg = "\\b(ipad|tablet|(Nexus 7)|up.browser" +
+		"|[1-4][0-9]{2}x[1-4][0-9]{2})\\b";
+	var isIphone = ua.match(StringPhoneReg),
+	isTable = ua.match(StringTableReg);
+	return !!isIphone || !!isTable;
 }
