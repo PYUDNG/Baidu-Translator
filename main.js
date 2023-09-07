@@ -81,7 +81,7 @@ window.addEventListener('load', function () {
 			box.dismiss();
 			alertify.success(CONST.Text.Success);
 			enable(btnTrans);
-			isMobile() && setTimeout(e => {
+			!isMobile() && setTimeout(e => {
 				input.focus();
 				input.setSelectionRange(0, 0);
 				input.scrollTo(0, 0);
