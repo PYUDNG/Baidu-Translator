@@ -87,9 +87,10 @@ window.addEventListener('load', function () {
 				input.scrollTo(0, 0);
 			});
 		}, function(rest) {
-			box.setContent(replaceText(CONST.Text.Translating, { '{Rest}': rest.toString() }))
+			box.setContent(replaceText(CONST.Text.Translating, { '{Rest}': rest.toString() }));
 		}, function(err) {
 			alertify.error(CONST.Text.Error);
+			box.dismiss();
 			enable(btnTrans);
 		});
 	}
