@@ -5,7 +5,7 @@
 // @name:zh-CN         用户脚本应用核心
 // @name:en            Userscript App Core
 // @namespace          Userscript-App
-// @version            0.3
+// @version            0.5
 // @description        Userscript App Core For Userscript Web Apps
 // @description:zh-CN  用户脚本网页应用核心
 // @description:en     Userscript App Core For Userscript Web Apps
@@ -37,96 +37,50 @@
 // @grant              GM_setClipboard
 // @grant              GM_info
 // @grant              unsafeWindow
+// @run-at             document-start
 // ==/UserScript==
 
 (function __MAIN__() {
-    'use strict';
+	'use strict';
 
-	// function DoLog() {}
-	// Arguments: level=LogLevel.Info, logContent, trace=false
-	const [LogLevel, DoLog] = (function() {
-		const LogLevel = {
-			None: 0,
-			Error: 1,
-			Success: 2,
-			Warning: 3,
-			Info: 4,
-		};
-
-		return [LogLevel, DoLog];
-		function DoLog() {
-			// Get window
-			const win = (typeof(unsafeWindow) === 'object' && unsafeWindow !== null) ? unsafeWindow : window;
-
-			const LogLevelMap = {};
-			LogLevelMap[LogLevel.None] = {
-				prefix: '',
-				color: 'color:#ffffff'
-			}
-			LogLevelMap[LogLevel.Error] = {
-				prefix: '[Error]',
-				color: 'color:#ff0000'
-			}
-			LogLevelMap[LogLevel.Success] = {
-				prefix: '[Success]',
-				color: 'color:#00aa00'
-			}
-			LogLevelMap[LogLevel.Warning] = {
-				prefix: '[Warning]',
-				color: 'color:#ffa500'
-			}
-			LogLevelMap[LogLevel.Info] = {
-				prefix: '[Info]',
-				color: 'color:#888888'
-			}
-			LogLevelMap[LogLevel.Elements] = {
-				prefix: '[Elements]',
-				color: 'color:#000000'
-			}
-
-			// Current log level
-			DoLog.logLevel = (win.isPY_DNG && win.userscriptDebugging) ? LogLevel.Info : LogLevel.Warning; // Info Warning Success Error
-
-			// Log counter
-			DoLog.logCount === undefined && (DoLog.logCount = 0);
-
-			// Get args
-			let [level, logContent, trace] = parseArgs([...arguments], [
-				[2],
-				[1,2],
-				[1,2,3]
-			], [LogLevel.Info, 'DoLog initialized.', false]);
-
-			// Log when log level permits
-			if (level <= DoLog.logLevel) {
-				let msg = '%c' + LogLevelMap[level].prefix + (typeof GM_info === 'object' ? `[${GM_info.script.name}]` : '') + (LogLevelMap[level].prefix ? ' ' : '');
-				let subst = LogLevelMap[level].color;
-
-				switch (typeof(logContent)) {
-					case 'string':
-						msg += '%s';
-						break;
-					case 'number':
-						msg += '%d';
-						break;
-					default:
-						msg += '%o';
-						break;
-				}
-
-				if (++DoLog.logCount > 512) {
-					console.clear();
-					DoLog.logCount = 0;
-				}
-				console[trace ? 'trace' : 'log'](msg, subst, logContent);
-			}
+	const CONST = {
+		Text: {
+			SetPassword: 'View/Set Password',
+			SetPasswordTip: 'Set your password: '
 		}
-	}) ();
+	}
 
 	main();
 	function main() {
-		unsafeWindow.GM_grant = GM_grant;
-		unsafeWindow.dispatchEvent(new Event('gmready'));
+		const UAC = {
+			grant: passFunc(GM_grant, () => GM_getValue('password', null)),
+			check: pswd => pswd === GM_getValue('password', null),
+			version: GM_info.version
+		};
+		Object.freeze(UAC);
+		Object.defineProperty(unsafeWindow, 'UAC', {
+			value: UAC,
+			writable: false,
+			configurable: false,
+			enumerable: false
+		});
+		unsafeWindow.dispatchEvent(new Event('uac-ready'));
+
+		GM_registerMenuCommand(CONST.Text.SetPassword, setPass);
+	}
+
+	function setPass() {
+		const newpass = prompt(CONST.Text.SetPasswordTip, GM_getValue('password', ''));
+		newpass !== null && GM_setValue('password', newpass);
+	}
+
+	function passFunc(func, pswd) {
+		return function() {
+			const password = typeof pswd === 'function' ? pswd() : pswd;
+			const correct = arguments.length !== 0 && password === arguments[arguments.length-1];
+
+			return correct ? func.apply(this, Array.from(arguments).slice(0, arguments.length-1)) : null;
+		}
 	}
 
 	function GM_grant(name) {
@@ -160,51 +114,5 @@
 		} else {
 			return null;
 		}
-	}
-
-	function parseArgs(args, rules, defaultValues=[]) {
-		// args and rules should be array, but not just iterable (string is also iterable)
-		if (!Array.isArray(args) || !Array.isArray(rules)) {
-			throw new TypeError('parseArgs: args and rules should be array')
-		}
-
-		// fill rules[0]
-		(!Array.isArray(rules[0]) || rules[0].length === 1) && rules.splice(0, 0, []);
-
-		// max arguments length
-		const count = rules.length - 1;
-
-		// args.length must <= count
-		if (args.length > count) {
-			throw new TypeError(`parseArgs: args has more elements(${args.length}) longer than ruless'(${count})`);
-		}
-
-		// rules[i].length should be === i if rules[i] is an array, otherwise it should be a function
-		for (let i = 1; i <= count; i++) {
-			const rule = rules[i];
-			if (Array.isArray(rule)) {
-				if (rule.length !== i) {
-					throw new TypeError(`parseArgs: rules[${i}](${rule}) should have ${i} numbers, but given ${rules[i].length}`);
-				}
-				if (!rule.every((num) => (typeof num === 'number' && num <= count))) {
-					throw new TypeError(`parseArgs: rules[${i}](${rule}) should contain numbers smaller than count(${count}) only`);
-				}
-			} else if (typeof rule !== 'function') {
-				throw new TypeError(`parseArgs: rules[${i}](${rule}) should be an array or a function.`)
-			}
-		}
-
-		// Parse
-		const rule = rules[args.length];
-		let parsed;
-		if (Array.isArray(rule)) {
-			parsed = [...defaultValues];
-			for (let i = 0; i < rule.length; i++) {
-				parsed[rule[i]-1] = args[i];
-			}
-		} else {
-			parsed = rule(args, defaultValues);
-		}
-		return parsed;
 	}
 })();

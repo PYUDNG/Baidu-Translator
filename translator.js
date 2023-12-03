@@ -1,7 +1,6 @@
 (function() {
-	console.log('Translator working mode: ' + (window.GM_grant ? 'direct' : 'event'));
 	window.transready = false;
-	window.GM_grant ? work() : window.addEventListener('gmready', work);
+	window.GM_grant ? work() : window.addEventListener('uac-client-ready', work);
 
 	function work() {
 		console.log('Translator working...')

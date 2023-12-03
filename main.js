@@ -14,6 +14,7 @@ const CONST = {
 		Downloaded: '已开始下载',
 		Emptied: '已清空',
 		DefaultFilename: '翻译结果.txt',
+		EnterPassword: '输入用户脚本应用核心密码: '
 	},
 	Style: {
 		DisabledColor: 'gray',
@@ -156,119 +157,6 @@ window.addEventListener('load', function () {
 	}
 });
 
-// Basic functions
-// querySelector
-function $() {
-	switch(arguments.length) {
-		case 2:
-			return arguments[0].querySelector(arguments[1]);
-			break;
-		default:
-			return document.querySelector(arguments[0]);
-	}
-}
-// querySelectorAll
-function $All() {
-	switch(arguments.length) {
-		case 2:
-			return arguments[0].querySelectorAll(arguments[1]);
-			break;
-		default:
-			return document.querySelectorAll(arguments[0]);
-	}
-}
-// createElement
-function $CrE() {
-	switch(arguments.length) {
-		case 2:
-			return arguments[0].createElement(arguments[1]);
-			break;
-		default:
-			return document.createElement(arguments[0]);
-	}
-}
-// addEventListener
-function $AEL(...args) {
-	const target = args.shift();
-	return target.addEventListener.apply(target, args);
-}
-function $$CrE() {
-	const [tagName, props, attrs, classes, styles, listeners] = parseArgs([...arguments], [
-		function(args, defaultValues) {
-			const arg = args[0];
-			return {
-				'string': () => [arg, ...defaultValues.filter((arg, i) => i > 0)],
-				'object': () => ['tagName', 'props', 'attrs', 'classes', 'styles', 'listeners'].map((prop, i) => arg.hasOwnProperty(prop) ? arg[prop] : defaultValues[i])
-			}[typeof arg]();
-		},
-		[1,2],
-		[1,2,3],
-		[1,2,3,4],
-		[1,2,3,4,5]
-	], ['div', {}, {}, [], {}, []]);
-	const elm = $CrE(tagName);
-	for (const [name, val] of Object.entries(props)) {
-		elm[name] = val;
-	}
-	for (const [name, val] of Object.entries(attrs)) {
-		elm.setAttribute(name, val);
-	}
-	for (const cls of Array.isArray(classes) ? classes : [classes]) {
-		elm.classList.add(cls);
-	}
-	for (const [name, val] of Object.entries(styles)) {
-		elm.style[name] = val;
-	}
-	for (const listener of listeners) {
-		$AEL(...[elm, ...listener]);
-	}
-	return elm;
-}
-function parseArgs(args, rules, defaultValues=[]) {
-	// args and rules should be array, but not just iterable (string is also iterable)
-	if (!Array.isArray(args) || !Array.isArray(rules)) {
-		throw new TypeError('parseArgs: args and rules should be array')
-	}
-
-	// fill rules[0]
-	(!Array.isArray(rules[0]) || rules[0].length === 1) && rules.splice(0, 0, []);
-
-	// max arguments length
-	const count = rules.length - 1;
-
-	// args.length must <= count
-	if (args.length > count) {
-		throw new TypeError(`parseArgs: args has more elements(${args.length}) longer than ruless'(${count})`);
-	}
-
-	// rules[i].length should be === i if rules[i] is an array, otherwise it should be a function
-	for (let i = 1; i <= count; i++) {
-		const rule = rules[i];
-		if (Array.isArray(rule)) {
-			if (rule.length !== i) {
-				throw new TypeError(`parseArgs: rules[${i}](${rule}) should have ${i} numbers, but given ${rules[i].length}`);
-			}
-			if (!rule.every((num) => (typeof num === 'number' && num <= count))) {
-				throw new TypeError(`parseArgs: rules[${i}](${rule}) should contain numbers smaller than count(${count}) only`);
-			}
-		} else if (typeof rule !== 'function') {
-			throw new TypeError(`parseArgs: rules[${i}](${rule}) should be an array or a function.`)
-		}
-	}
-
-	// Parse
-	const rule = rules[args.length];
-	let parsed;
-	if (Array.isArray(rule)) {
-		parsed = [...defaultValues];
-		for (let i = 0; i < rule.length; i++) {
-			parsed[rule[i]-1] = args[i];
-		}
-	} else {
-		parsed = rule(args, defaultValues);
-	}
-	return parsed;
-}
 // Enable/Disable buttons
 function disable(btn, text) {
 	if (btn.disabled) {
@@ -343,47 +231,6 @@ function copyText(text) {
     newInput.select();
     document.execCommand('copy');
     document.body.removeChild(newInput);
-}
-
-// Replace model text with no mismatching of replacing replaced text
-// e.g. replaceText('aaaabbbbccccdddd', {'a': 'b', 'b': 'c', 'c': 'd', 'd': 'e'}) === 'bbbbccccddddeeee'
-//      replaceText('abcdAABBAA', {'BB': 'AA', 'AAAAAA': 'This is a trap!'}) === 'abcdAAAAAA'
-//      replaceText('abcd{AAAA}BB}', {'{AAAA}': '{BB', '{BBBB}': 'This is a trap!'}) === 'abcd{BBBB}'
-//      replaceText('abcd', {}) === 'abcd'
-/* Note:
-    replaceText will replace in sort of replacer's iterating sort
-    e.g. currently replaceText('abcdAABBAA', {'BBAA': 'TEXT', 'AABB': 'TEXT'}) === 'abcdAATEXT'
-    but remember: (As MDN Web Doc said,) Although the keys of an ordinary Object are ordered now, this was
-    not always the case, and the order is complex. As a result, it's best not to rely on property order.
-    So, don't expect replaceText will treat replacer key-values in any specific sort. Use replaceText to
-    replace irrelevance replacer keys only.
-*/
-function replaceText(text, replacer) {
-	if (Object.entries(replacer).length === 0) {return text;}
-	const [models, targets] = Object.entries(replacer);
-	const len = models.length;
-	let text_arr = [{text: text, replacable: true}];
-	for (const [model, target] of Object.entries(replacer)) {
-		text_arr = replace(text_arr, model, target);
-	}
-	return text_arr.map((text_obj) => (text_obj.text)).join('');
-
-	function replace(text_arr, model, target) {
-		const result_arr = [];
-		for (const text_obj of text_arr) {
-			if (text_obj.replacable) {
-				const splited = text_obj.text.split(model);
-				for (const part of splited) {
-					result_arr.push({text: part, replacable: true});
-					result_arr.push({text: target, replacable: false});
-				}
-				result_arr.pop();
-			} else {
-				result_arr.push(text_obj);
-			}
-		}
-		return result_arr;
-	}
 }
 
 function isMobile() {
