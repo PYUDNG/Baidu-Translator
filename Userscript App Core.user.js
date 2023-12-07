@@ -5,7 +5,7 @@
 // @name:zh-CN         用户脚本应用核心
 // @name:en            Userscript App Core
 // @namespace          Userscript-App
-// @version            0.5
+// @version            0.6
 // @description        Userscript App Core For Userscript Web Apps
 // @description:zh-CN  用户脚本网页应用核心
 // @description:en     Userscript App Core For Userscript Web Apps
@@ -55,7 +55,7 @@
 		const UAC = {
 			grant: passFunc(GM_grant, () => GM_getValue('password', null)),
 			check: pswd => pswd === GM_getValue('password', null),
-			version: GM_info.version
+			version: GM_info.script.version
 		};
 		Object.freeze(UAC);
 		Object.defineProperty(unsafeWindow, 'UAC', {
