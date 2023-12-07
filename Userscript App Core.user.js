@@ -5,12 +5,12 @@
 // @name:zh-CN         用户脚本应用核心
 // @name:en            Userscript App Core
 // @namespace          Userscript-App
-// @version            0.6
+// @version            0.6.1
 // @description        Userscript App Core For Userscript Web Apps
 // @description:zh-CN  用户脚本网页应用核心
 // @description:en     Userscript App Core For Userscript Web Apps
 // @author             PY-DNG
-// @license            GPL-v3
+// @license            MIT
 // @match              http*://*/*
 // @connect            *
 // @grant              GM_info
